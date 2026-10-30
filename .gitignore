@@ -1,0 +1,14 @@
+# Compiled binaries
+*.exe
+*.o
+*.obj
+
+# Backup files & nested copies
+*.bak
+*backup*
+fds_project - Copy/
+user_frontend/
+
+# Temporary & OS files
+.DS_Store
+Thumbs.db

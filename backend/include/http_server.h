@@ -208,7 +208,7 @@ private:
            << "Content-Length: " << res.body.size()  << "\r\n"
            << "Access-Control-Allow-Origin: *\r\n"
            << "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n"
-           << "Access-Control-Allow-Headers: Content-Type\r\n"
+           << "Access-Control-Allow-Headers: *\r\n"
            << "Connection: close\r\n"
            << "\r\n"
            << res.body;

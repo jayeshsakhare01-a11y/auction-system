@@ -329,62 +329,61 @@ public:
 
         std::cout << "[SEED] Creating demo auctions...\n";
 
+        // Vehicle auctions matching Boli with 24-hour durations
         createAuction(
-            "Vintage Mechanical Watch",
-            "A rare 1960s Swiss mechanical watch in pristine condition with exhibition caseback and leather strap.",
-            "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=300&fit=crop",
-            150.00, 120);   // 2 min
+            "2021 Hyundai Creta 1.5 SX(O)",
+            "Fuel: Petrol | Trans: Manual | 34,200 km | 1st Owner | RTO: MH12 Pune | Comprehensive Insurance | Zero Dep | 140-point inspection passed | Clean engine bay and transmission | Genuine service records",
+            "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop",
+            850000.00, 86400);
 
         createAuction(
-            "Gaming Laptop RTX 4080",
-            "High-performance gaming laptop: RTX 4080, Intel i9-13900H, 32GB DDR5, 1TB NVMe SSD, 240Hz QHD display.",
-            "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=300&fit=crop",
-            800.00, 180);   // 3 min
+            "2022 Royal Enfield Continental GT 650",
+            "Fuel: Petrol | Trans: Manual | 8,400 km | 1st Owner | RTO: MH14 PCMC | Comprehensive Insurance | Twin Brembo brakes | Custom flyscreen & bar-end mirrors | Ceramic coated",
+            "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop",
+            240000.00, 86400);
 
         createAuction(
-            "Original Oil Painting - Sunset",
-            "Stunning landscape oil painting on canvas, 24x36 inches, signed by emerging contemporary artist.",
-            "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=300&fit=crop",
-            200.00, 240);   // 4 min
+            "2020 Honda City 1.5 ZX CVT",
+            "Fuel: Petrol | Trans: Automatic | 41,000 km | 1st Owner | RTO: MH02 Mumbai | Full Sunroof & Leather | Honda Care Extended Warranty | Non-accidental certified",
+            "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&auto=format&fit=crop",
+            720000.00, 86400);
 
         createAuction(
-            "Antique Wooden Chess Set",
-            "Hand-carved mahogany chess set from the 1920s. Complete 32 pieces with original inlaid board.",
-            "https://images.unsplash.com/photo-1586165368502-1bad9cc4be10?w=400&h=300&fit=crop",
-            75.00, 300);    // 5 min
+            "2023 Kawasaki Ninja ZX-6R KRT",
+            "Fuel: Petrol | Trans: Manual | 5,200 km | 1st Owner | RTO: DL03 Delhi | Showroom condition | Akrapovic slip-on exhaust | Quickshifter & traction control",
+            "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=800&auto=format&fit=crop",
+            980000.00, 86400);
 
         createAuction(
-            "Signed First-Edition Novel",
-            "First-edition hardcover signed by the author on publication day. Dust jacket in excellent condition.",
-            "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop",
-            50.00, 600);    // 10 min
+            "2019 BMW 3 Series 320d Luxury Line",
+            "Fuel: Diesel | Trans: Automatic | 52,000 km | 1st Owner | RTO: KA01 Bangalore | Harman Kardon audio | Panoramic sunroof | New Michelin Pilot Sport tyres",
+            "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop",
+            1850000.00, 86400);
 
         createAuction(
-            "Professional DSLR Camera Kit",
-            "Full-frame DSLR body with 3 prime lenses (35mm, 50mm, 85mm), speedlite flash, and hard-shell case.",
-            "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop",
-            500.00, 420);   // 7 min
+            "2022 Tata Nexon EV Max XZ+ Lux",
+            "Fuel: Electric | Trans: Automatic | 22,000 km | 1st Owner | RTO: GJ01 Ahmedabad | 405 km ARAI range | 7.2 kW Fast AC charger included | 8-year battery warranty",
+            "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=800&auto=format&fit=crop",
+            1050000.00, 86400);
 
         std::cout << "[SEED] Placing initial demo bids...\n";
 
-        placeBid(1, 2, 175.00);   // Bob    → Watch
-        placeBid(1, 3, 210.00);   // Charlie→ Watch
-        placeBid(1, 4, 230.00);   // Diana  → Watch
+        placeBid(1, 2, 880000.00);   // Bob   → Creta
+        placeBid(1, 4, 925000.00);   // Diana → Creta
 
-        placeBid(2, 1, 850.00);   // Alice  → Laptop
-        placeBid(2, 4, 920.00);   // Diana  → Laptop
-        placeBid(2, 5, 950.00);   // Ethan  → Laptop
+        placeBid(2, 5, 255000.00);   // Ethan → Enfield
+        placeBid(2, 2, 265000.00);   // Bob   → Enfield
 
-        placeBid(3, 1, 250.00);   // Alice  → Painting
-        placeBid(3, 3, 280.00);   // Charlie→ Painting
+        placeBid(3, 3, 740000.00);   // Charlie → Honda City
+        placeBid(3, 4, 755000.00);   // Diana   → Honda City
 
-        placeBid(4, 2, 100.00);   // Bob    → Chess Set
-        placeBid(4, 5, 125.00);   // Ethan  → Chess Set
+        placeBid(4, 2, 1000000.00);  // Bob   → Ninja
+        placeBid(4, 5, 1030000.00);  // Ethan → Ninja
 
-        placeBid(5, 3,  65.00);   // Charlie→ Book
+        placeBid(5, 1, 1880000.00);  // Alice → BMW
+        placeBid(5, 2, 1920000.00);  // Bob   → BMW
 
-        placeBid(6, 4, 550.00);   // Diana  → Camera
-        placeBid(6, 1, 600.00);   // Alice  → Camera
+        placeBid(6, 4, 1075000.00);  // Diana → Nexon EV
 
         std::cout << "[SEED] Demo data ready! "
                   << users.size()    << " users, "

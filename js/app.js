@@ -4,10 +4,8 @@
 
 const NGROK_LIVE_URL = 'https://democracy-unluckily-affront.ngrok-free.dev';
 
-// If running on github.io, connect to the live ngrok backend; otherwise use relative path
-const API_BASE = (window.location.hostname && window.location.hostname.includes('github.io'))
-  ? NGROK_LIVE_URL
-  : '';
+// Always connect to the ngrok backend (works from GitHub Pages and locally)
+const API_BASE = NGROK_LIVE_URL;
 
 // -------- Fallback Demo Data (For Static Hosting / GitHub Pages) --------
 const FALLBACK_USERS = [

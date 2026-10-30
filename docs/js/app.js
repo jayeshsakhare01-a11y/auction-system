@@ -202,7 +202,7 @@ function timeAgo(timestamp) {
 
 // -------- API Helpers --------
 async function api(method, path, body) {
-  const opts = { method, headers: {} };
+  const opts = { method, headers: { 'ngrok-skip-browser-warning': 'true' } };
   if (body) {
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);

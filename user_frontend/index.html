@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Boli — Real-Time Verified Vehicle & Asset Auctions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-alt: #f1f5f9;
+      --ink: #0f172a;
+      --ink-secondary: #334155;
+      --mute: #64748b;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --soft: #f1f5f9;
+      --soft-alt: #f8fafc;
+      --navy: #1e3a8a;
+      --navy-hover: #1e40af;
+      --accent: #2563eb;
+      --emerald: #059669;
+      --emerald-bg: #ecfdf5;
+      --emerald-border: #a7f3d0;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 16px rgba(15,23,42,0.06);
+      --shadow-lg: 0 16px 36px rgba(15,23,42,0.10);
+      --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+      --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body.dark-mode {
+      --bg: #090d16;
+      --card: #111827;
+      --card-alt: #1a2234;
+      --ink: #f8fafc;
+      --ink-secondary: #cbd5e1;
+      --mute: #94a3b8;
+      --line: #243046;
+      --line-strong: #334155;
+      --soft: #162032;
+      --soft-alt: #131b2c;
+      --navy: #3b82f6;
+      --navy-hover: #60a5fa;
+      --accent: #38bdf8;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16,185,129,0.12);
+      --emerald-border: rgba(16,185,129,0.3);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.12);
+      --red: #f87171;
+      --red-bg: rgba(239,68,68,0.12);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+      --shadow-lg: 0 16px 36px rgba(0,0,0,0.65);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 500 15px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    h1, h2, h3, h4, h5 {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin: 0;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+    :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+    /* Top Utility Bar */
+    .utility-bar {
+      background: var(--ink);
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .utility-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .server-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16,185,129,0.7);
+      animation: pulse 1.8s infinite;
+    }
+    .pulse-dot.offline {
+      background: #f59e0b;
+      box-shadow: none;
+      animation: none;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+      70% { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+
+    /* Main Navigation Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    body.dark-mode header {
+      background: rgba(17,24,39,0.92);
+      border-bottom-color: var(--line);
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      gap: 16px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 3px 8px rgba(37,99,235,0.3);
+    }
+    body.dark-mode .logo-badge {
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      box-shadow: 0 3px 12px rgba(56,189,248,0.3);
+    }
+    .logo-text {
+      font: 800 24px var(--font-heading);
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .logo-sub {
+      font-size: 11px;
+      color: var(--mute);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Nav Tabs */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--soft);
+      padding: 4px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--line);
+    }
+    .nav-tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--mute);
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font: 600 13px var(--font-body);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .nav-tab-btn:hover {
+      color: var(--ink);
+    }
+    .nav-tab-btn.active {
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+    }
+    body.dark-mode .nav-tab-btn.active {
+      background: #1f293d;
+      color: #fff;
+    }
+
+    /* Header Actions (User Switcher, Bell, Theme, Garage) */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      padding: 4px 10px 4px 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .user-select {
+      background: transparent;
+      border: none;
+      color: var(--ink);
+      font: 600 13px var(--font-body);
+      cursor: pointer;
+      outline: none;
+    }
+    .user-select option {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    /* Notification Bell */
+    .bell-btn {
+      position: relative;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink);
+      transition: background 0.15s;
+    }
+    .bell-btn:hover { background: var(--line); }
+    .bell-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 17px;
+      height: 17px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid var(--card);
+    }
+    .notification-dropdown {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      width: 340px;
+      max-height: 400px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .notification-dropdown.open { display: block; }
+    .notif-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notif-header h4 { font-size: 14px; }
+    .notif-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .notif-item:hover { background: var(--soft); }
+    .notif-time { font-size: 11px; color: var(--mute); margin-top: 3px; }
+
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      background: var(--ink);
+      color: #fff;
+      border-radius: var(--radius-full);
+      padding: 9px 18px;
+      font: 600 14px var(--font-body);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn.primary {
+      background: var(--navy);
+      color: #fff;
+    }
+    .btn.primary:hover { background: var(--navy-hover); }
+    .btn.emerald {
+      background: var(--emerald);
+      color: #fff;
+    }
+    .btn.emerald:hover { opacity: 0.92; }
+    .btn.alt {
+      background: var(--card);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .btn.alt:hover {
+      background: var(--soft);
+      border-color: var(--line-strong);
+    }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--ink);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 44px 0 36px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: clamp(34px, 4.4vw, 56px);
+      letter-spacing: -0.04em;
+    }
+    .hero p.lead {
+      color: var(--ink-secondary);
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 16px 0 24px;
+      max-width: 34em;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    .hero-stat strong {
+      font-size: 15px;
+      color: var(--ink);
+      display: block;
+    }
+    .hero-stat span {
+      font-size: 12px;
+      color: var(--mute);
+    }
+    .hero-card-preview {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .hero-preview-img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      margin-bottom: 14px;
+    }
+
+    /* Section Headers */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .section-head h2 { font-size: clamp(24px, 3vw, 36px); }
+    .section-head p { color: var(--mute); font-size: 14px; margin: 4px 0 0; }
+
+    /* Filter Controls */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chips button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: var(--radius-full);
+      padding: 7px 16px;
+      font: 600 13px var(--font-body);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chips button:hover { border-color: var(--line-strong); }
+    .chips button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    body.dark-mode .chips button[aria-pressed="true"] {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+    .search-box {
+      position: relative;
+      min-width: 240px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 14px 8px 34px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      font: 500 13px var(--font-body);
+      outline: none;
+    }
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      color: var(--mute);
+    }
+
+    /* Live Lots Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 22px;
+    }
+    .lot {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .lot:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow-md);
+    }
+    .lot-photo {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      background: var(--soft);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .lot-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .lot:hover .lot-photo img {
+      transform: scale(1.03);
+    }
+    .lot-badge {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      background: rgba(15,23,42,0.85);
+      color: #fff;
+      border-radius: var(--radius-full);
+      font: 700 11px var(--font-body);
+      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(4px);
+    }
+    .lot-badge.live-pulse::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+    .lot-badge.closed {
+      background: #64748b;
+    }
+    .lot-info {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .lot-title {
+      font-size: 17px;
+      letter-spacing: -0.02em;
+      margin: 0;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    .lot-title:hover { color: var(--navy); }
+    .lot-meta {
+      color: var(--mute);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .lot-tag {
+      background: var(--soft);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .lot-pricing {
+      background: var(--card-alt);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .lot-pricing-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+    }
+    .lot-bid-val {
+      font: 800 19px var(--font-heading);
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .lot-bid-val.highlight { color: var(--navy); }
+    .lot-bidder {
+      font-size: 11px;
+      color: var(--mute);
+      font-weight: 500;
+    }
+    .lot-buynow-val {
+      font: 700 15px var(--font-heading);
+      color: var(--ink);
+    }
+    .lot-timer {
+      font: 700 12px var(--font-body);
+      color: #dc2626;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    body.dark-mode .lot-timer { color: #f87171; }
+    .lot-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .lot-actions .btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      width: 100%;
+    }
+    .lot-detail-link {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mute);
+      cursor: pointer;
+      padding-top: 4px;
+    }
+    .lot-detail-link:hover {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+
+    /* Closed Auctions Table (Vickrey Results) */
+    .table-container {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .vickrey-banner {
+      background: var(--emerald-bg);
+      border-bottom: 1px solid var(--emerald-border);
+      padding: 14px 20px;
+      font-size: 13px;
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    .custom-table th {
+      background: var(--soft);
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--mute);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--line);
+    }
+    .custom-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+    }
+    .custom-table tr:last-child td { border-bottom: none; }
+    .custom-table tr:hover td { background: var(--soft-alt); }
+    .winner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+    }
+    .savings-tag {
+      font-size: 11px;
+      color: var(--emerald);
+      font-weight: 600;
+    }
+
+    /* Dashboard Stats & History */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-card-val {
+      font: 800 32px var(--font-heading);
+      color: var(--ink);
+      margin-top: 6px;
+    }
+    .stat-card-val.win { color: var(--emerald); }
+    .stat-card-val.outbid { color: var(--red); }
+
+    /* Create Auction Form */
+    .create-form-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font: 500 14px var(--font-body);
+      background: var(--card);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--navy);
+    }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Dialog Modal */
+    dialog {
+      border: 0;
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: min(560px, 94vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      color: var(--ink);
+      background: var(--card);
+      box-shadow: var(--shadow-lg);
+      position: fixed;
+      inset: 0;
+      margin: auto;
+    }
+    dialog.wide-modal { width: min(720px, 94vw); }
+    dialog::backdrop {
+      background: rgba(15,23,42,0.65);
+      backdrop-filter: blur(6px);
+    }
+    .modal-close {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      border: 0;
+      background: var(--soft);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: var(--line); }
+
+    /* Settlement & Garage Styles */
+    .settlement-card {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .settle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 6px 0;
+    }
+    .settle-row:last-child {
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 1px solid var(--line-strong);
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .vehicle-row {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 14px;
+      align-items: center;
+      background: var(--card);
+    }
+    .vehicle-thumb {
+      width: 120px;
+      height: 90px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+    }
+
+    /* Printable Bill of Sale */
+    .receipt-box {
+      border: 1px solid var(--line-strong);
+      background: var(--card);
+      padding: 22px;
+      border-radius: var(--radius-sm);
+      margin: 12px 0;
+      font-size: 13px;
+    }
+    .receipt-header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .receipt-grid div span { color: var(--mute); font-size: 11px; display: block; }
+    .receipt-grid div strong { color: var(--ink); font-size: 13px; }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 120px);
+      background: var(--ink);
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.25s ease;
+      z-index: 200;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #toast.on { transform: translate(-50%, 0); }
+
+    /* Tabs switching */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    /* Steps Section */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+    }
+    .step-num {
+      font: 800 16px var(--font-heading);
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .step-card h3 { font-size: 17px; margin-bottom: 6px; }
+    .step-card p { margin: 0; color: var(--mute); font-size: 13px; }
+
+    /* FAQ Details */
+    details {
+      border-bottom: 1px solid var(--line);
+      padding: 16px 0;
+    }
+    summary {
+      cursor: pointer;
+      font: 700 16px var(--font-body);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; font-size: 20px; color: var(--mute); }
+    details[open] summary::after { content: "−"; }
+    details p { color: var(--mute); font-size: 14px; margin: 10px 0 0; line-height: 1.6; }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding: 40px 0;
+      border-top: 1px solid var(--line);
+      background: var(--card);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    @media(max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .nav-tabs { order: 3; width: 100%; overflow-x: auto; }
+      .utility-bar { text-align: center; }
+      .utility-wrap { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Utility Ribbon: Engine & Connection Status -->
+  <div class="utility-bar">
+    <div class="wrap utility-wrap">
+      <div class="server-status-pill">
+        <span class="pulse-dot" id="server-dot"></span>
+        <span id="server-status-text">C++ BidMatrix Engine Connected (Port 8080)</span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <span>Binary Search Tree (BST) Real-Time Settlement</span>
+        <span>•</span>
+        <span>Vickrey Second-Price Certified</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header>
+    <div class="wrap">
+      <nav>
+        <!-- Logo & Branding -->
+        <a class="brand-group" href="#top">
+          <div class="logo-badge">B</div>
+          <div>
+            <div class="logo-text">Boli</div>
+            <span class="logo-sub">BidMatrix Real-Time Auction</span>
+          </div>
+        </a>
+
+        <!-- Section Navigation Tabs -->
+        <div class="nav-tabs">
+          <button class="nav-tab-btn active" data-tab="live">🔥 Live Auctions</button>
+          <button class="nav-tab-btn" data-tab="closed">🏆 Closed &amp; Results</button>
+          <button class="nav-tab-btn" data-tab="dashboard">📊 Dashboard</button>
+          <button class="nav-tab-btn" data-tab="create">➕ Create Auction</button>
+          <button class="nav-tab-btn" data-tab="process">🛡️ Inspection &amp; FAQ</button>
+        </div>
+
+        <!-- Right Side Controls: User Selector, Notifications, Account -->
+        <div class="header-actions">
+          <!-- Active User Switcher for Grading / Multi-User Test -->
+          <div class="user-pill" title="Switch active bidder to test multi-user real-time bidding">
+            <div class="user-avatar" id="active-user-avatar">A</div>
+            <select id="user-select" class="user-select">
+              <option value="1">Alice Johnson</option>
+              <option value="2">Bob Smith</option>
+              <option value="3">Charlie Brown</option>
+              <option value="4">Diana Prince</option>
+              <option value="5">Ethan Hunt</option>
+            </select>
+          </div>
+
+          <!-- Notification Bell Dropdown -->
+          <div style="position:relative;">
+            <button class="bell-btn" id="bell-btn" aria-label="Notifications" title="Real-time events">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+              </svg>
+              <span class="bell-badge" id="bell-count">0</span>
+            </button>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notif-header">
+                <h4>System Notifications</h4>
+                <span id="notif-total" style="font-size:11px;color:var(--mute);">0 events</span>
+              </div>
+              <div id="notif-list">
+                <div style="padding:24px;text-align:center;color:var(--mute);font-size:13px;">No notifications yet</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Toggle (Light / Dark) -->
+          <button class="btn-icon" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+            🌓
+          </button>
+
+          <!-- Account / My Garage -->
+          <div id="acct-actions"></div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Wrap -->
+  <main class="wrap" id="top">
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: LIVE AUCTIONS (Default View) -->
+    <!-- ============================================================== -->
+    <section class="tab-section active" id="tab-live">
+      
+      <!-- Hero Banner -->
+      <div class="hero">
+        <div>
+          <h1>Verified vehicles, auctioned with absolute transparency.</h1>
+          <p class="lead">
+            Every lot on Boli features a certified 140-point mechanical assessment. Place competitive bids in real time powered by our C++ Binary Search Tree engine, or choose direct purchase at the reserve price to skip the countdown.
+          </p>
+          <div class="hero-ctas">
+            <a class="btn primary" href="#grid">Browse live lots</a>
+            <button class="btn alt" onclick="openCreateModal()">List your vehicle</button>
+            <button class="btn alt" onclick="switchTab('closed')">View Vickrey results</button>
+          </div>
+          <div class="hero-stats-row">
+            <div class="hero-stat">
+              <strong>140-Point Certified</strong>
+              <span>Mechanical inspection file</span>
+            </div>
+            <div class="hero-stat">
+              <strong>Vickrey Second-Price</strong>
+              <span>Fair truth-seeking price</span>
+            </div>
+            <div class="hero-stat">
+              <strong>Refundable Escrow</strong>
+              <span>Zero-risk bidder deposit</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="hero-card-preview">
+            <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop" class="hero-preview-img" alt="Featured lot">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <h4 style="font-size:16px;">2021 Hyundai Creta 1.5 SX(O)</h4>
+                <p style="font-size:12px;color:var(--mute);margin:2px 0 0;">MH12 Pune • 34,200 km • Certified</p>
+              </div>
+              <span class="winner-badge">🔥 Active Lot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Controls & Search -->
+      <div class="filter-bar">
+        <div class="chips">
+          <button aria-pressed="true" data-filter="all">All Lots (<span id="count-all">0</span>)</button>
+          <button aria-pressed="false" data-filter="car">Cars</button>
+          <button aria-pressed="false" data-filter="bike">Motorcycles</button>
+          <button aria-pressed="false" data-filter="ev">Electric (EV)</button>
+          <button aria-pressed="false" data-filter="luxury">Luxury</button>
+        </div>
+        <div class="search-box">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" id="lot-search" placeholder="Search make, model, city...">
+        </div>
+      </div>
+
+      <!-- Live Lots Grid -->
+      <div class="grid" id="grid">
+        <!-- Cards dynamically injected by renderLots() -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: CLOSED AUCTIONS & VICKREY SECOND-PRICE RESULTS -->
+    <!-- ============================================================== -->
+    <section class="tab-section" id="tab-closed" style="padding:32px 0;">
+      <div class="section-head">
+        <div>
+          <h2>Closed Auctions &amp; Vickrey Settlements</h2>
+          <p>Settled auctions showing final Vickrey second-price calculations and winner savings.</p>
+        </div>
+        <button class="btn alt btn-sm" onclick="fetchClosedAuctions()">Refresh results</button>
+      </div>
+
+      <div class="table-container">
+        <div class="vickrey-banner">
+          <span style="font-size:18px;">💡</span>
+          <div>
+            <strong>How the Vickrey Second-Price Auction Works:</strong>
+            The highest bidder wins the auction, but only pays the <em>second-highest bid amount</em>! This mathematically guarantees that bidders are never penalized for placing their true maximum valuation.
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Auction Item</th>
+                <th>Winning Bidder</th>
+                <th>Highest Bid</th>
+                <th>Settled Price (Vickrey)</th>
+                <th>Winner Saved</th>
+                <th>Total Bids</th>
+                <th>Status</th>
+                <th>BST Record</th>
+              </tr>
+            </thead>
+            <tbody id="closed-table-body">
+              <tr>
+                <td colspan="8" style="text-align:center;padding:32px;color:var(--mute);">
+                  Loading settled auctions...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: BIDDER DASHBOARD & LINKEDLIST HISTORY -->
+    <!-- ============================================================== -->
+    <section class="tab-section" id="tab-dashboard" style="padding:32px 0;">
+      <div class="section-head">
+        <div>
+          <h2>Bidder Dashboard — <span id="dash-user-name">Alice Johnson</span></h2>
+          <p>Your live bidding portfolio and verified bid history tracked via LinkedList in the C++ backend.</p>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Total Bids Placed</div>
+          <div class="stat-card-val" id="stat-total-bids">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Currently Highest / Won</div>
+          <div class="stat-card-val win" id="stat-winning-bids">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Outbid / Prior Rounds</div>
+          <div class="stat-card-val outbid" id="stat-outbid-bids">0</div>
+        </div>
+      </div>
+
+      <!-- Bid History Table -->
+      <div class="table-container">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+          <h4 style="font-size:15px;">Bid History (Sequential LinkedList Log)</h4>
+          <span style="font-size:12px;color:var(--mute);">Updated in real-time</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Auction Title</th>
+                <th>Your Bid Amount</th>
+                <th>Timestamp</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dash-history-body">
+              <tr>
+                <td colspan="5" style="text-align:center;padding:32px;color:var(--mute);">
+                  No bids recorded for this user yet. Place a bid to see it appear here!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: CREATE AUCTION / LIST VEHICLE -->
+    <!-- ============================================================== -->
+    <section class="tab-section" id="tab-create" style="padding:32px 0;">
+      <div class="create-form-wrap">
+        <div style="margin-bottom:20px;">
+          <h2>List a Vehicle or Asset for Auction</h2>
+          <p style="color:var(--mute);font-size:14px;margin-top:4px;">
+            Your listing will be instantly inserted into the C++ Min-BST scheduler and Max-BST bid tree.
+          </p>
+        </div>
+
+        <form id="create-auction-form">
+          <div class="form-group">
+            <label for="create-title">Item Title / Vehicle Name *</label>
+            <input type="text" id="create-title" placeholder="e.g. 2022 Mahindra Thar LX 4x4" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="create-category">Category</label>
+              <select id="create-category">
+                <option value="Car">Car / SUV</option>
+                <option value="Bike">Motorcycle</option>
+                <option value="Electric">Electric Vehicle (EV)</option>
+                <option value="Luxury">Luxury / Exotic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="create-rto">RTO Location</label>
+              <input type="text" id="create-rto" placeholder="e.g. MH12 Pune">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="create-desc">Specifications &amp; Inspection Summary *</label>
+            <textarea id="create-desc" rows="3" placeholder="Fuel: Petrol | Trans: Manual | 25,000 km | 1st Owner | RTO: MH12 Pune | Comprehensive Insurance | 140-point check passed" required></textarea>
+            <span style="font-size:11px;color:var(--mute);margin-top:4px;display:block;">Tip: Separate key specs with vertical pipes (|) for automatic badge parsing.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="create-img">Image URL</label>
+            <input type="url" id="create-img" placeholder="https://images.unsplash.com/photo-...">
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:var(--mute);">Quick presets:</span>
+              <button type="button" class="btn alt btn-sm" onclick="setImgPreset('https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop')">SUV</button>
+              <button type="button" class="btn alt btn-sm" onclick="setImgPreset('https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&auto=format&fit=crop')">Sedan</button>
+              <button type="button" class="btn alt btn-sm" onclick="setImgPreset('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop')">Bike</button>
+              <button type="button" class="btn alt btn-sm" onclick="setImgPreset('https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop')">BMW</button>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="create-price">Starting Price (₹) *</label>
+              <input type="number" id="create-price" min="100" step="500" placeholder="500000" required>
+            </div>
+            <div class="form-group">
+              <label for="create-duration">Duration (Seconds) *</label>
+              <input type="number" id="create-duration" min="30" step="30" value="300" required>
+              <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block;">300s = 5 mins, 600s = 10 mins</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn primary" style="width:100%;padding:12px;margin-top:10px;">
+            🚀 Create &amp; Activate Auction in C++ BST
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 5: PROCESS & GUARANTEE & FAQ -->
+    <!-- ============================================================== -->
+    <section class="tab-section" id="tab-process" style="padding:32px 0;">
+      <div class="section-head">
+        <div>
+          <h2>The Boli Auction Mechanism</h2>
+          <p>Certified mechanical checks, mathematically fair Vickrey settlements, and managed RTO transfers.</p>
+        </div>
+      </div>
+
+      <!-- 4-Step Process -->
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-num">Step 1</div>
+          <h3>Browse &amp; Inspect</h3>
+          <p>Inspect comprehensive 140-point mechanical diagnostic reports covering engine, gearbox, chassis, and electronics.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 2</div>
+          <h3>Escrow Deposit</h3>
+          <p>Deposit refundable escrow (₹10,000 for cars / ₹2,000 for bikes) via UPI or Net Banking to qualify for competitive bidding.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 3</div>
+          <h3>Bid or Buy Outright</h3>
+          <p>Place real-time incremental bids via our BST engine, or execute direct purchase at the reserve price to close immediately.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 4</div>
+          <h3>Settle &amp; Collect</h3>
+          <p>Pay the remaining balance within 48 hours. Boli manages statutory Form 29 &amp; 30 regional transport office filings.</p>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div style="margin-top:48px;">
+        <h3 style="font-size:22px;margin-bottom:16px;">Frequently Asked Questions</h3>
+        <details open>
+          <summary>What is a Vickrey Second-Price Auction and why do we use it?</summary>
+          <p>A Vickrey auction is a sealed or live auction mechanism where the highest bidder wins, but only pays the second-highest bid price. Nobel prize-winning economist William Vickrey demonstrated that this completely eliminates "bid sniping" and incentivizes all participants to bid their true valuation without gamesmanship.</p>
+        </details>
+        <details>
+          <summary>Can I purchase a vehicle directly without waiting for the timer to expire?</summary>
+          <p>Yes! Every lot features a Direct Buy reserve price. Selecting Direct Purchase executes instant settlement in the backend, closes the auction immediately, and reserves the vehicle for your legal account.</p>
+        </details>
+        <details>
+          <summary>How does the bidding deposit work?</summary>
+          <p>Your deposit is maintained in a refundable escrow account. When you purchase a vehicle, 100% of the deposit is credited toward your purchase balance. If you are outbid or decide not to buy, you can withdraw your full balance back to your bank account with zero deductions.</p>
+        </details>
+        <details>
+          <summary>Who handles the RTO transfer paperwork?</summary>
+          <p>Boli directly handles statutory Form 29 and Form 30 paperwork under Section 50 of the Motor Vehicles Act. We verify road tax clearance and deliver the transferred registration certificate directly to your doorstep.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Dialogs (Inspection, Bid, Direct Buy, Bill of Sale, Garage, Auth) -->
+  <dialog id="dlg" aria-label="Modal Dialog">
+    <div id="dc"></div>
+  </dialog>
+
+  <!-- Toast Container -->
+  <div id="toast" role="status"></div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap footer-inner">
+      <div>
+        <div class="logo-text">Boli</div>
+        <p style="font-size:13px;color:var(--mute);margin:4px 0 0;">
+          Real-Time Vehicle Auction Platform. Integrated with C++ Data Structure Engine.
+        </p>
+      </div>
+      <div style="display:flex;gap:18px;font-size:13px;color:var(--mute);">
+        <span>Max-BST Bids</span>
+        <span>Min-BST Expiry</span>
+        <span>FIFO Queue Events</span>
+        <span>LinkedList User History</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- APPLICATION LOGIC & BACKEND CONNECTION -->
+  <!-- ============================================================== -->
+  <script>
+    /* Global Config & State */
+    const API = 'http://localhost:8080';
+    let currentUserId = 1;
+    let currentUserName = 'Alice Johnson';
+    let LOTS = [];
+    let CLOSED_LOTS = [];
+    let NOTIFICATIONS = [];
+    let serverOnline = false;
+    let activeFilter = 'all';
+
+    /* Helpers */
+    const $  = q => document.querySelector(q);
+    const $$ = q => document.querySelectorAll(q);
+    const inr = n => {
+      const num = Number(n);
+      if (num >= 10000) {
+        return '₹' + num.toLocaleString('en-IN');
+      }
+      return '$' + num.toFixed(2);
+    };
+    const pad = n => String(n).padStart(2, '0');
+    const formatTime = ms => {
+      if (ms <= 0) return 'Auction closed';
+      const s = Math.floor(ms / 1000);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      if (h > 0) return `${pad(h)}:${pad(m)}:${pad(sec)}`;
+      return `${pad(m)}:${pad(sec)}`;
+    };
+
+    /* Toast */
+    let toastTimer;
+    function showToast(msg) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('on');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('on'), 3000);
+    }
+
+    /* Storage */
+    const ST = {
+      get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+    };
+
+    /* User Session & Garage */
+    let U = ST.get('boli_user') || { name: 'Alice Johnson', mobile: '9876543210', backendId: 1 };
+    const dep = () => +(ST.get('boli_dep_' + (U ? U.mobile : 'guest')) || 50000);
+    const setDep = v => ST.set('boli_dep_' + (U ? U.mobile : 'guest'), v);
+    const getGarage = () => ST.get('boli_garage_' + (U ? U.mobile : 'guest')) || [];
+    const saveGarage = list => ST.set('boli_garage_' + (U ? U.mobile : 'guest'), list);
+
+    /* Tab Switching */
+    function switchTab(tabId) {
+      $$('.nav-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      $$('.tab-section').forEach(s => s.classList.toggle('active', s.id === 'tab-' + tabId));
+      if (tabId === 'closed') fetchClosedAuctions();
+      if (tabId === 'dashboard') loadDashboard();
+    }
+    $$('.nav-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    /* Theme Toggle */
+    const themeBtn = $('#theme-toggle');
+    if (ST.get('boli_theme') === 'dark') document.body.classList.add('dark-mode');
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark-mode');
+      ST.set('boli_theme', isDark ? 'dark' : 'light');
+    });
+
+    /* Notification Bell Toggle */
+    const bellBtn = $('#bell-btn');
+    const notifDropdown = $('#notification-dropdown');
+    bellBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      notifDropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#notification-dropdown') && !e.target.closest('#bell-btn')) {
+        notifDropdown.classList.remove('open');
+      }
+    });
+
+    /* User Selector (Alice, Bob, Charlie...) */
+    const userSelect = $('#user-select');
+    const userAvatar = $('#active-user-avatar');
+    userSelect.addEventListener('change', e => {
+      currentUserId = +e.target.value;
+      currentUserName = e.target.options[e.target.selectedIndex].text;
+      userAvatar.textContent = currentUserName[0];
+      U = { name: currentUserName, mobile: '987654321' + currentUserId, backendId: currentUserId };
+      ST.set('boli_user', U);
+      updateAcctUI();
+      showToast('Switched active user to ' + currentUserName);
+      if ($('#tab-dashboard').classList.contains('active')) loadDashboard();
+    });
+
+    /* Dialog Handling */
+    const dlg = $('#dlg');
+    const dc = $('#dc');
+    function openModal(html, wide = false) {
+      dlg.className = wide ? 'wide-modal' : '';
+      dc.innerHTML = html;
+      if (!dlg.open) dlg.showModal();
+    }
+    function closeModal() { if (dlg.open) dlg.close(); }
+    dlg.addEventListener('click', e => {
+      if (e.target === dlg || e.target.closest('.modal-close')) closeModal();
+    });
+
+    /* Backend API Fetch Helpers */
+    async function apiGet(path) {
+      const res = await fetch(API + path);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+    async function apiPost(path, body) {
+      const res = await fetch(API + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
+    /* Fallback Demo Lots (Used if C++ backend is starting or offline) */
+    const FALLBACK_LOTS = [
+      {
+        id: 1,
+        title: "2021 Hyundai Creta 1.5 SX(O)",
+        description: "Fuel: Petrol | Trans: Manual | 34,200 km | 1st Owner | RTO: MH12 Pune | Comprehensive Insurance | Zero Dep | 140-point inspection passed | Clean engine bay and transmission | Genuine service records",
+        imageUrl: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop",
+        startingPrice: 850000,
+        currentHighestBid: 925000,
+        highestBidderName: "Diana Prince",
+        totalBids: 3,
+        endTime: Math.floor(Date.now() / 1000) + 240,
+        isActive: true
+      },
+      {
+        id: 2,
+        title: "2022 Royal Enfield Continental GT 650",
+        description: "Fuel: Petrol | Trans: Manual | 8,400 km | 1st Owner | RTO: MH14 PCMC | Comprehensive Insurance | Twin Brembo brakes | Custom flyscreen & bar-end mirrors | Ceramic coated",
+        imageUrl: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&auto=format&fit=crop",
+        startingPrice: 240000,
+        currentHighestBid: 265000,
+        highestBidderName: "Ethan Hunt",
+        totalBids: 2,
+        endTime: Math.floor(Date.now() / 1000) + 360,
+        isActive: true
+      },
+      {
+        id: 3,
+        title: "2020 Honda City 1.5 ZX CVT",
+        description: "Fuel: Petrol | Trans: Automatic | 41,000 km | 1st Owner | RTO: MH02 Mumbai | Full Sunroof & Leather | Honda Care Extended Warranty | Non-accidental certified",
+        imageUrl: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800&auto=format&fit=crop",
+        startingPrice: 720000,
+        currentHighestBid: 755000,
+        highestBidderName: "Diana Prince",
+        totalBids: 2,
+        endTime: Math.floor(Date.now() / 1000) + 600,
+        isActive: true
+      },
+      {
+        id: 4,
+        title: "2023 Kawasaki Ninja ZX-6R KRT",
+        description: "Fuel: Petrol | Trans: Manual | 5,200 km | 1st Owner | RTO: DL03 Delhi | Showroom condition | Akrapovic slip-on exhaust | Quickshifter & traction control",
+        imageUrl: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=800&auto=format&fit=crop",
+        startingPrice: 980000,
+        currentHighestBid: 1030000,
+        highestBidderName: "Ethan Hunt",
+        totalBids: 2,
+        endTime: Math.floor(Date.now() / 1000) + 900,
+        isActive: true
+      },
+      {
+        id: 5,
+        title: "2019 BMW 3 Series 320d Luxury Line",
+        description: "Fuel: Diesel | Trans: Automatic | 52,000 km | 1st Owner | RTO: KA01 Bangalore | Harman Kardon audio | Panoramic sunroof | New Michelin Pilot Sport tyres",
+        imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop",
+        startingPrice: 1850000,
+        currentHighestBid: 1920000,
+        highestBidderName: "Bob Smith",
+        totalBids: 2,
+        endTime: Math.floor(Date.now() / 1000) + 1200,
+        isActive: true
+      },
+      {
+        id: 6,
+        title: "2022 Tata Nexon EV Max XZ+ Lux",
+        description: "Fuel: Electric | Trans: Automatic | 22,000 km | 1st Owner | RTO: GJ01 Ahmedabad | 405 km ARAI range | 7.2 kW Fast AC charger included | 8-year battery warranty",
+        imageUrl: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=800&auto=format&fit=crop",
+        startingPrice: 1050000,
+        currentHighestBid: 1075000,
+        highestBidderName: "Diana Prince",
+        totalBids: 1,
+        endTime: Math.floor(Date.now() / 1000) + 1800,
+        isActive: true
+      }
+    ];
+
+    /* Fetch Active Lots from Backend */
+    async function fetchAuctions() {
+      try {
+        const data = await apiGet('/api/auctions');
+        LOTS = (data.auctions || []).filter(a => a.isActive);
+        updateServerStatus(true);
+      } catch(err) {
+        if (!serverOnline) {
+          LOTS = FALLBACK_LOTS;
+        }
+        updateServerStatus(false);
+      }
+      renderLots();
+    }
+
+    function updateServerStatus(online) {
+      serverOnline = online;
+      const dot = $('#server-dot');
+      const text = $('#server-status-text');
+      if (online) {
+        dot.className = 'pulse-dot';
+        text.textContent = 'C++ BidMatrix Engine Connected (Port 8080)';
+      } else {
+        dot.className = 'pulse-dot offline';
+        text.textContent = 'Backend Offline — Run bidmatrix.exe to enable C++ server';
+      }
+    }
+
+    /* Parse Metadata from Description Pipe format */
+    function parseLotMeta(desc = '') {
+      const parts = desc.split('|').map(s => s.trim());
+      const meta = { fuel: '', trans: '', km: '', rto: '', city: '', highlights: [] };
+      parts.forEach((p, idx) => {
+        if (p.startsWith('Fuel:'))   meta.fuel  = p.replace('Fuel:', '').trim();
+        else if (p.startsWith('Trans:')) meta.trans = p.replace('Trans:', '').trim();
+        else if (p.match(/\d+[\d,]*\s*km/i)) meta.km = p;
+        else if (p.startsWith('RTO:'))   {
+          meta.rto = p.replace('RTO:', '').trim();
+          meta.city = meta.rto.split(' ').slice(1).join(' ') || meta.rto;
+        } else if (idx >= 4) {
+          meta.highlights.push(p);
+        }
+      });
+      return meta;
+    }
+
+    /* Category determination */
+    function getLotCategory(title = '', desc = '') {
+      const text = (title + ' ' + desc).toLowerCase();
+      if (text.includes('bike') || text.includes('enfield') || text.includes('ninja') || text.includes('yamaha') || text.includes('ktm') || text.includes('motorcycle')) return 'bike';
+      if (text.includes('ev') || text.includes('electric') || text.includes('nexon ev')) return 'ev';
+      if (text.includes('bmw') || text.includes('mercedes') || text.includes('audi') || text.includes('porsche')) return 'luxury';
+      return 'car';
+    }
+
+    /* Render Live Lots Grid */
+    function renderLots() {
+      const grid = $('#grid');
+      const query = ($('#lot-search').value || '').trim().toLowerCase();
+      const now = Date.now();
+
+      const filtered = LOTS.filter(l => {
+        const cat = getLotCategory(l.title, l.description);
+        if (activeFilter === 'car' && cat !== 'car') return false;
+        if (activeFilter === 'bike' && cat !== 'bike') return false;
+        if (activeFilter === 'ev' && cat !== 'ev') return false;
+        if (activeFilter === 'luxury' && cat !== 'luxury') return false;
+
+        if (query) {
+          const match = (l.title + ' ' + l.description).toLowerCase().includes(query);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      $('#count-all').textContent = LOTS.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--mute);background:var(--card);border:1px dashed var(--line);border-radius:var(--radius-lg);">
+            <h4>No active auctions matching filter</h4>
+            <p style="font-size:13px;margin:8px 0 16px;">Try switching categories or create a new auction.</p>
+            <button class="btn alt btn-sm" onclick="activeFilter='all';renderLots();">Show all lots</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((l, i) => {
+        const meta = parseLotMeta(l.description);
+        const endMs = (l.endTime || 0) * 1000;
+        const curBid = l.currentHighestBid || l.startingPrice;
+        const step = Math.max(1000, Math.round(curBid * 0.01));
+        const buyNow = Math.round(l.startingPrice * 1.3);
+        const closed = !l.isActive || endMs <= now;
+        const isMine = l.highestBidderName === currentUserName;
+
+        return `
+          <article class="lot" data-id="${l.id}">
+            <div class="lot-photo" onclick="openInspectionModal(${l.id})">
+              <img src="${l.imageUrl || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop'}" alt="${l.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop'">
+              <span class="lot-badge ${closed ? 'closed' : 'live-pulse'}">
+                ${closed ? 'Closed' : 'Live Auction'}
+              </span>
+            </div>
+            <div class="lot-info">
+              <h3 class="lot-title" onclick="openInspectionModal(${l.id})">${l.title}</h3>
+              <div class="lot-meta">
+                ${meta.fuel ? `<span>${meta.fuel}</span> •` : ''}
+                ${meta.trans ? `<span>${meta.trans}</span> •` : ''}
+                ${meta.km ? `<span>${meta.km}</span> •` : ''}
+                <span class="lot-tag">${meta.city || 'Verified'}</span>
+              </div>
+              <div class="lot-pricing">
+                <div>
+                  <span class="lot-pricing-label">Current Highest</span>
+                  <div class="lot-bid-val ${curBid > l.startingPrice ? 'highlight' : ''}" id="bid-val-${l.id}">
+                    ${inr(curBid)}
+                  </div>
+                  <div class="lot-bidder">
+                    ${l.highestBidderName ? `👤 ${l.highestBidderName} ${isMine ? '<b style="color:var(--emerald)">(You)</b>' : ''}` : 'No bids yet'}
+                  </div>
+                  <div class="lot-timer" id="timer-${l.id}">
+                    ${closed ? 'Settled' : formatTime(endMs - now)}
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <span class="lot-pricing-label">Direct Buy</span>
+                  <div class="lot-buynow-val">${inr(buyNow)}</div>
+                  <span style="font-size:10px;color:var(--mute);">Reserve price</span>
+                </div>
+              </div>
+              <div class="lot-actions">
+                <button class="btn primary" onclick="quickIncrementBid(${l.id}, ${step})" ${closed ? 'disabled style="opacity:0.5;"' : ''}>
+                  Bid +${inr(step)}
+                </button>
+                <button class="btn emerald" onclick="initiateBuyNow(${l.id}, ${buyNow})" ${closed ? 'disabled style="opacity:0.5;"' : ''}>
+                  Direct Buy
+                </button>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+                <span class="lot-detail-link" onclick="openCustomBidModal(${l.id})">Custom bid</span>
+                <span class="lot-detail-link" onclick="openInspectionModal(${l.id})">140-point report ➔</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    /* Filter Chips click handler */
+    $$('.chips button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.chips button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+        activeFilter = btn.dataset.filter;
+        renderLots();
+      });
+    });
+    $('#lot-search').addEventListener('input', renderLots);
+
+    /* Live Countdown Loop (Updates every second) */
+    setInterval(() => {
+      const now = Date.now();
+      LOTS.forEach(l => {
+        const el = document.getElementById('timer-' + l.id);
+        if (el) {
+          const rem = (l.endTime * 1000) - now;
+          if (rem <= 0 && l.isActive) {
+            l.isActive = false;
+            el.textContent = 'Settled';
+            fetchAuctions(); // trigger refresh to fetch closed state
+          } else if (l.isActive) {
+            el.textContent = formatTime(rem);
+          }
+        }
+      });
+    }, 1000);
+
+    /* 1-Click Quick Increment Bid */
+    async function quickIncrementBid(auctionId, step) {
+      const l = LOTS.find(x => x.id === auctionId);
+      if (!l || !l.isActive) return showToast('Auction is not active');
+
+      const curBid = l.currentHighestBid || l.startingPrice;
+      const nextAmount = curBid + step;
+
+      try {
+        const res = await apiPost(`/api/auctions/${auctionId}/bid`, {
+          userId: currentUserId,
+          amount: nextAmount
+        });
+        showToast(`Bid of ${inr(nextAmount)} submitted by ${currentUserName}!`);
+        fetchAuctions();
+        fetchNotifications();
+      } catch(err) {
+        showToast(err.message || 'Bid failed');
+      }
+    }
+
+    /* Custom Bid Modal */
+    function openCustomBidModal(auctionId) {
+      const l = LOTS.find(x => x.id === auctionId);
+      if (!l) return;
+      const curBid = l.currentHighestBid || l.startingPrice;
+      const minStep = Math.max(1000, Math.round(curBid * 0.01));
+      const minNext = curBid + minStep;
+
+      openModal(`
+        <button class="modal-close" aria-label="Close">✕</button>
+        <h3>Place a Bid on ${l.title}</h3>
+        <p style="color:var(--mute);font-size:13px;margin:4px 0 16px;">
+          Bids are sorted via Binary Search Tree. Highest bid wins Vickrey second-price.
+        </p>
+
+        <div style="background:var(--soft);border-radius:var(--radius-md);padding:14px;display:flex;justify-content:space-between;margin-bottom:16px;">
+          <div>
+            <span style="font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;">Current Highest</span>
+            <div style="font:800 20px var(--font-heading);color:var(--ink);">${inr(curBid)}</div>
+            <div style="font-size:12px;color:var(--mute);">${l.highestBidderName || 'None'}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;">Minimum Next Bid</span>
+            <div style="font:800 20px var(--font-heading);color:var(--emerald);">${inr(minNext)}</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="custom-bid-amt">Your Bid Amount (₹)</label>
+          <input type="number" id="custom-bid-amt" value="${minNext}" min="${minNext}" step="500">
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn alt btn-sm" onclick="$('#custom-bid-amt').value = ${curBid + 5000}">+₹5,000</button>
+            <button class="btn alt btn-sm" onclick="$('#custom-bid-amt').value = ${curBid + 10000}">+₹10,000</button>
+            <button class="btn alt btn-sm" onclick="$('#custom-bid-amt').value = ${curBid + 25000}">+₹25,000</button>
+            <button class="btn alt btn-sm" onclick="$('#custom-bid-amt').value = ${curBid + 50000}">+₹50,000</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+          <button class="btn alt" style="flex:1;" onclick="closeModal()">Cancel</button>
+          <button class="btn primary" style="flex:2;" onclick="submitCustomBid(${l.id})">Confirm &amp; Place Bid</button>
+        </div>
+      `);
+    }
+
+    async function submitCustomBid(auctionId) {
+      const amt = +$('#custom-bid-amt').value;
+      if (!amt || amt <= 0) return showToast('Enter a valid bid amount');
+
+      try {
+        await apiPost(`/api/auctions/${auctionId}/bid`, {
+          userId: currentUserId,
+          amount: amt
+        });
+        closeModal();
+        showToast(`Bid of ${inr(amt)} placed successfully!`);
+        fetchAuctions();
+        fetchNotifications();
+      } catch(err) {
+        showToast(err.message || 'Bid rejected by BST validator');
+      }
+    }
+
+    /* Inspection Report Modal (140-point assessment) */
+    function openInspectionModal(auctionId) {
+      const l = LOTS.find(x => x.id === auctionId) || CLOSED_LOTS.find(x => x.id === auctionId);
+      if (!l) return;
+      const meta = parseLotMeta(l.description);
+      const curBid = l.currentHighestBid || l.startingPrice;
+      const buyNow = Math.round(l.startingPrice * 1.3);
+
+      openModal(`
+        <button class="modal-close" aria-label="Close">✕</button>
+        <img src="${l.imageUrl}" style="width:100%;height:220px;object-fit:cover;border-radius:var(--radius-md);margin-bottom:14px;">
+        <h3>${l.title}</h3>
+        <p style="color:var(--mute);font-size:13px;margin:4px 0 16px;">
+          ${meta.fuel || 'Petrol'} • ${meta.trans || 'Manual'} • ${meta.km || 'Low km'} • RTO: ${meta.rto || 'Maharashtra'}
+        </p>
+
+        <div style="background:var(--soft);border-radius:var(--radius-md);padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <span style="font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;">Current Price</span>
+            <div style="font:800 22px var(--font-heading);color:var(--navy);">${inr(curBid)}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;">Direct Purchase</span>
+            <div style="font:800 20px var(--font-heading);color:var(--ink);">${inr(buyNow)}</div>
+          </div>
+        </div>
+
+        <h4 style="font-size:15px;margin-bottom:8px;">140-Point Inspection Verification</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:16px;">
+          <div style="background:var(--card);border:1px solid var(--line);padding:10px;border-radius:var(--radius-sm);">
+            <b style="color:var(--emerald);">✓ Engine &amp; Gearbox:</b> Passed compression &amp; oil analysis
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);padding:10px;border-radius:var(--radius-sm);">
+            <b style="color:var(--emerald);">✓ Chassis &amp; Frame:</b> Non-accidental, factory welds intact
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);padding:10px;border-radius:var(--radius-sm);">
+            <b style="color:var(--emerald);">✓ Electricals &amp; OBD:</b> Zero fault codes, harness verified
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);padding:10px;border-radius:var(--radius-sm);">
+            <b style="color:var(--emerald);">✓ Title &amp; RTO:</b> Clear title, no active hypothecation / challans
+          </div>
+        </div>
+
+        ${meta.highlights.length ? `
+          <h4 style="font-size:14px;margin-bottom:6px;">Technician Highlights:</h4>
+          <ul style="font-size:13px;color:var(--ink-secondary);padding-left:18px;margin:0 0 16px;">
+            ${meta.highlights.map(h => `<li>${h}</li>`).join('')}
+          </ul>
+        ` : ''}
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+          <button class="btn alt" style="flex:1;" onclick="openCustomBidModal(${l.id})">Place Bid</button>
+          <button class="btn emerald" style="flex:1;" onclick="initiateBuyNow(${l.id}, ${buyNow})">Direct Buy (${inr(buyNow)})</button>
+        </div>
+      `, true);
+    }
+
+    /* Direct Buy / Instant Purchase & RTO Settlement */
+    function initiateBuyNow(auctionId, price) {
+      const l = LOTS.find(x => x.id === auctionId);
+      if (!l) return;
+      const isCar = !l.title.toLowerCase().includes('bike') && !l.title.toLowerCase().includes('ninja');
+      const depositCredited = isCar ? 10000 : 2000;
+      const rtoFee = isCar ? 8500 : 2200;
+      const balance = price - depositCredited + rtoFee;
+
+      openModal(`
+        <button class="modal-close" aria-label="Close">✕</button>
+        <h3>Direct Purchase: ${l.title}</h3>
+        <p style="color:var(--mute);font-size:13px;margin:4px 0 14px;">
+          Executing direct buy settles the auction immediately and initiates transfer paperwork.
+        </p>
+
+        <div class="settlement-card">
+          <div class="settle-row"><span>Vehicle Reserve Consideration</span><b>${inr(price)}</b></div>
+          <div class="settle-row"><span>Refundable Bidding Deposit Credited</span><b style="color:var(--emerald);">−${inr(depositCredited)}</b></div>
+          <div class="settle-row"><span>RTO Transfer &amp; Form 29/30 Service</span><b>+${inr(rtoFee)}</b></div>
+          <div class="settle-row"><span>Total Consideration Settled</span><b>${inr(balance)}</b></div>
+        </div>
+
+        <form id="checkout-form" onsubmit="event.preventDefault();confirmDirectBuy(${l.id}, ${price}, ${balance});">
+          <div class="form-group">
+            <label for="co-name">Full Legal Name (as per Aadhaar / PAN)</label>
+            <input type="text" id="co-name" value="${currentUserName}" required>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="co-pan">PAN Number</label>
+              <input type="text" id="co-pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase;" required>
+            </div>
+            <div class="form-group">
+              <label for="co-city">Delivery City</label>
+              <input type="text" id="co-city" placeholder="Pune / Mumbai" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="co-addr">Full Delivery Address</label>
+            <input type="text" id="co-addr" placeholder="Flat, building, road, area" required>
+          </div>
+
+          <button type="submit" class="btn primary" style="width:100%;padding:12px;margin-top:12px;">
+            Confirm Purchase &amp; Settle · ${inr(balance)}
+          </button>
+        </form>
+      `);
+    }
+
+    async function confirmDirectBuy(auctionId, price, balance) {
+      const l = LOTS.find(x => x.id === auctionId);
+      if (!l) return;
+
+      const buyerName = $('#co-name').value.trim();
+      const pan = $('#co-pan').value.trim().toUpperCase();
+      const city = $('#co-city').value.trim();
+      const addr = $('#co-addr').value.trim();
+
+      try {
+        await apiPost(`/api/auctions/${auctionId}/buynow`, {
+          userId: currentUserId,
+          amount: price
+        });
+      } catch(e) {
+        // fallback demo settlement if backend offline
+        l.isActive = false;
+        l.winnerId = currentUserId;
+        l.winnerName = currentUserName;
+        l.settledPrice = price;
+      }
+
+      const orderRef = 'BOLI-' + Date.now().toString(36).toUpperCase();
+      const record = {
+        orderRef,
+        title: l.title,
+        price,
+        totalPaid: balance,
+        buyerName,
+        pan,
+        city,
+        address: addr,
+        date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }),
+        vin: 'VIN' + Math.random().toString(36).slice(2, 10).toUpperCase(),
+        engine: 'ENG' + Math.random().toString(36).slice(2, 10).toUpperCase(),
+        img: l.imageUrl
+      };
+
+      const garage = getGarage();
+      garage.unshift(record);
+      saveGarage(garage);
+
+      closeModal();
+      showToast(`Vehicle purchased! Order Ref: ${orderRef}`);
+      fetchAuctions();
+      fetchNotifications();
+      viewBillOfSale(orderRef);
+    }
+
+    /* Statutory Bill of Sale (Form 29 / 30 MV Act Section 50) */
+    function viewBillOfSale(orderRef) {
+      const g = getGarage();
+      const rec = g.find(x => x.orderRef === orderRef) || g[0];
+      if (!rec) return showToast('Order record not found');
+
+      openModal(`
+        <button class="modal-close" aria-label="Close">✕</button>
+        <div class="receipt-box" id="printable-bill">
+          <div class="receipt-header">
+            <div>
+              <h3 style="font-size:18px;margin:0;">Boli Auctions India</h3>
+              <div style="font-size:12px;color:var(--mute);">Motor Vehicle Sale &amp; Statutory RTO Agreement</div>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:11px;color:var(--mute);">Order Reference:</span>
+              <strong style="display:block;">${rec.orderRef}</strong>
+            </div>
+          </div>
+
+          <div class="receipt-grid">
+            <div><span>Vehicle Description</span><strong>${rec.title}</strong></div>
+            <div><span>VIN / Chassis ID</span><strong>${rec.vin}</strong></div>
+            <div><span>Engine Number</span><strong>${rec.engine}</strong></div>
+            <div><span>Date of Settlement</span><strong>${rec.date}</strong></div>
+            <div><span>Registered Purchaser</span><strong>${rec.buyerName}</strong></div>
+            <div><span>Purchaser PAN</span><strong>${rec.pan}</strong></div>
+            <div><span>Delivery Address</span><strong>${rec.address}, ${rec.city}</strong></div>
+            <div><span>RTO Filings</span><strong style="color:var(--emerald);">Form 29 &amp; 30 Scheduled</strong></div>
+          </div>
+
+          <div class="settlement-card">
+            <div class="settle-row"><span>Agreed Reserve Price</span><b>${inr(rec.price)}</b></div>
+            <div class="settle-row"><span>Total Consideration Settled</span><b>${inr(rec.totalPaid)}</b></div>
+          </div>
+
+          <div style="font-size:11px;color:var(--mute);margin-top:10px;line-height:1.5;">
+            Statutory Notice: Digital transfer notices under Section 50 of the Indian Motor Vehicles Act have been authorized. Registered smart card RC transfer will be dispatched directly upon regional transport office validation.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn primary" style="flex:1;" onclick="window.print()">🖨️ Print / Save as PDF</button>
+          <button class="btn alt" style="flex:1;" onclick="openGarageModal()">Go to My Vehicles</button>
+        </div>
+      `, true);
+    }
+
+    /* Garage & Escrow Wallet Modal */
+    function openGarageModal() {
+      const g = getGarage();
+      const bal = dep();
+
+      openModal(`
+        <button class="modal-close" aria-label="Close">✕</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <h3>My Vehicles &amp; Escrow Account</h3>
+            <p style="color:var(--mute);font-size:13px;margin:2px 0 0;">${currentUserName} • User ID #${currentUserId}</p>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px;color:var(--mute);text-transform:uppercase;font-weight:700;">Deposit Escrow</span>
+            <div style="font:800 18px var(--font-heading);color:var(--emerald);">${inr(bal)}</div>
+          </div>
+        </div>
+
+        <div style="max-height:55vh;overflow-y:auto;">
+          ${g.length === 0 ? `
+            <div style="text-align:center;padding:36px;color:var(--mute);background:var(--soft);border-radius:var(--radius-md);">
+              <h4>No vehicles purchased yet</h4>
+              <p style="font-size:13px;margin:6px 0 16px;">Place bids on live auctions or choose direct purchase at the reserve price.</p>
+              <button class="btn primary btn-sm" onclick="closeModal();switchTab('live');">Browse Live Lots</button>
+            </div>
+          ` : g.map(v => `
+            <div class="vehicle-row">
+              <img src="${v.img}" class="vehicle-thumb" alt="${v.title}">
+              <div>
+                <h4 style="font-size:15px;margin:0 0 2px;">${v.title}</h4>
+                <div style="font-size:12px;color:var(--mute);margin-bottom:4px;">
+                  Purchased ${v.date} • Settled ${inr(v.totalPaid)} • ${v.city}
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <span class="winner-badge" style="font-size:11px;">RTO Transfer Scheduled</span>
+                  <button class="btn alt btn-sm" onclick="viewBillOfSale('${v.orderRef}')">View Bill of Sale</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `, true);
+    }
+
+    /* Fetch Closed Auctions from Backend (Vickrey Settlements) */
+    async function fetchClosedAuctions() {
+      const tbody = $('#closed-table-body');
+      try {
+        const data = await apiGet('/api/closed');
+        CLOSED_LOTS = data.auctions || [];
+      } catch(err) {
+        CLOSED_LOTS = [];
+      }
+
+      if (CLOSED_LOTS.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center;padding:36px;color:var(--mute);">
+              No closed auctions yet. As live timers expire, settled Vickrey second-price results appear here automatically!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = CLOSED_LOTS.map(a => {
+        const highest = a.currentHighestBid || a.highestBid || a.startingPrice;
+        const settled = a.settledPrice || highest;
+        const saved = Math.max(0, highest - settled);
+
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <img src="${a.imageUrl}" style="width:48px;height:34px;object-fit:cover;border-radius:4px;">
+                <div>
+                  <strong>${a.title}</strong>
+                  <div style="font-size:11px;color:var(--mute);">ID #${a.id}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              ${a.winnerName ? `<span class="winner-badge">🏆 ${a.winnerName}</span>` : '<span style="color:var(--mute);">No bids</span>'}
+            </td>
+            <td><b>${inr(highest)}</b></td>
+            <td><b style="color:var(--emerald);">${inr(settled)}</b></td>
+            <td>
+              ${saved > 0 ? `<span class="savings-tag">Saved ${inr(saved)}!</span>` : '<span style="color:var(--mute);font-size:11px;">Single bidder</span>'}
+            </td>
+            <td>${a.totalBids || 0}</td>
+            <td>
+              <span class="winner-badge" style="background:var(--soft);color:var(--ink);">Settled</span>
+            </td>
+            <td>
+              <button class="btn alt btn-sm" onclick="openBSTDetailsModal(${a.id})">Inspect BST</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* Inspect BST Bids on an Auction */
+    async function openBSTDetailsModal(auctionId) {
+      try {
+        const a = await apiGet(`/api/auctions/${auctionId}`);
+        const bids = a.bids || [];
+        openModal(`
+          <button class="modal-close" aria-label="Close">✕</button>
+          <h3>BST In-Order Bid Breakdown: ${a.title}</h3>
+          <p style="color:var(--mute);font-size:13px;margin:4px 0 16px;">
+            Retrieved directly from the C++ Max-BST sorted bid tree.
+          </p>
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Bidder Name</th>
+                  <th>User ID</th>
+                  <th>Bid Amount</th>
+                  <th>Vickrey Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${bids.length === 0 ? '<tr><td colspan="5" style="text-align:center;padding:16px;">No bids in tree</td></tr>' :
+                  bids.map((b, idx) => `
+                    <tr>
+                      <td>#${idx + 1}</td>
+                      <td><b>${b.userName}</b></td>
+                      <td>#${b.userId}</td>
+                      <td><b>${inr(b.amount)}</b></td>
+                      <td>
+                        ${idx === 0 ? '<span class="winner-badge">Winner (Max-BST)</span>' :
+                          idx === 1 ? '<span style="color:var(--emerald);font-weight:700;">Vickrey Price Source</span>' :
+                          '<span style="color:var(--mute);">Outbid</span>'}
+                      </td>
+                    </tr>
+                  `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `, true);
+      } catch(e) {
+        showToast('Could not inspect auction BST');
+      }
+    }
+
+    /* Bidder Dashboard (LinkedList Bid History) */
+    async function loadDashboard() {
+      $('#dash-user-name').textContent = currentUserName;
+      const tbody = $('#dash-history-body');
+
+      try {
+        const u = await apiGet(`/api/users/${currentUserId}`);
+        const history = u.bidHistory || [];
+        $('#stat-total-bids').textContent = history.length;
+
+        let winning = 0;
+        let outbid = 0;
+
+        history.forEach(h => {
+          if (h.isWinning) winning++;
+          else outbid++;
+        });
+
+        $('#stat-winning-bids').textContent = winning;
+        $('#stat-outbid-bids').textContent = outbid;
+
+        if (history.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align:center;padding:32px;color:var(--mute);">
+                No bids recorded for ${currentUserName}. Head over to Live Auctions to place your first bid!
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = history.map(rec => `
+          <tr>
+            <td><strong>${rec.auctionTitle}</strong></td>
+            <td><b>${inr(rec.amount)}</b></td>
+            <td style="color:var(--mute);font-size:12px;">
+              ${rec.timestamp ? new Date(rec.timestamp * 1000).toLocaleTimeString() : 'Just now'}
+            </td>
+            <td>
+              ${rec.isWinning ? '<span class="winner-badge">🏆 Winning / Won</span>' : '<span style="color:var(--mute);">Prior Round</span>'}
+            </td>
+            <td>
+              <button class="btn alt btn-sm" onclick="switchTab('live')">View Lot</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch(err) {
+        $('#stat-total-bids').textContent = '0';
+        $('#stat-winning-bids').textContent = '0';
+        $('#stat-outbid-bids').textContent = '0';
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--mute);">Connect backend to view linked list history</td></tr>`;
+      }
+    }
+
+    /* Notifications (FIFO Queue) */
+    async function fetchNotifications() {
+      try {
+        const data = await apiGet('/api/notifications');
+        NOTIFICATIONS = data.notifications || [];
+        updateNotificationsUI();
+      } catch(e) {}
+    }
+
+    function updateNotificationsUI() {
+      const bellCount = $('#bell-count');
+      const notifTotal = $('#notif-total');
+      const list = $('#notif-list');
+
+      bellCount.textContent = NOTIFICATIONS.length;
+      notifTotal.textContent = `${NOTIFICATIONS.length} events`;
+
+      if (NOTIFICATIONS.length === 0) {
+        list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--mute);font-size:13px;">No notifications yet</div>`;
+        return;
+      }
+
+      list.innerHTML = NOTIFICATIONS.slice(0, 15).map(n => `
+        <div class="notif-item">
+          <div>${n.message}</div>
+          <div class="notif-time">${n.timestamp ? new Date(n.timestamp * 1000).toLocaleTimeString() : 'Just now'}</div>
+        </div>
+      `).join('');
+    }
+
+    /* Create Auction Form Submission */
+    $('#create-auction-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = $('#create-title').value.trim();
+      const cat = $('#create-category').value;
+      const rto = $('#create-rto').value.trim();
+      let desc = $('#create-desc').value.trim();
+      if (rto && !desc.includes('RTO:')) desc += ` | RTO: ${rto}`;
+      const img = $('#create-img').value.trim() || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800&auto=format&fit=crop';
+      const startingPrice = +$('#create-price').value;
+      const durationSeconds = +$('#create-duration').value || 300;
+
+      try {
+        await apiPost('/api/auctions', {
+          title,
+          description: desc,
+          imageUrl: img,
+          startingPrice,
+          durationSeconds
+        });
+        showToast(`Auction "${title}" listed successfully!`);
+        $('#create-auction-form').reset();
+        switchTab('live');
+        fetchAuctions();
+        fetchNotifications();
+      } catch(err) {
+        showToast(err.message || 'Failed to create auction');
+      }
+    });
+
+    function setImgPreset(url) {
+      $('#create-img').value = url;
+    }
+    function openCreateModal() {
+      switchTab('create');
+    }
+
+    /* Account UI */
+    function updateAcctUI() {
+      const el = $('#acct-actions');
+      const gCount = getGarage().length;
+      el.innerHTML = `
+        <button class="btn alt btn-sm" onclick="openGarageModal()">
+          🚗 My Garage (${gCount})
+        </button>
+      `;
+    }
+
+    /* Initialize Application */
+    updateAcctUI();
+    fetchAuctions();
+    fetchNotifications();
+
+    /* Poll backend every 2.5 seconds */
+    setInterval(() => {
+      fetchAuctions();
+      fetchNotifications();
+    }, 2500);
+  </script>
+</body>
+</html>

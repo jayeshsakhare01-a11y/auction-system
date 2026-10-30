@@ -7,7 +7,6 @@
 *.bak
 *backup*
 fds_project - Copy/
-user_frontend/
 
 # Temporary & OS files
 .DS_Store

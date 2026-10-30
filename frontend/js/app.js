@@ -2,7 +2,100 @@
 // BidMatrix — Application Logic
 // ============================================
 
-const API_BASE = ''; // same origin
+const NGROK_LIVE_URL = 'https://democracy-unluckily-affront.ngrok-free.dev';
+
+// If running on github.io, connect to the live ngrok backend; otherwise use relative path
+const API_BASE = (window.location.hostname && window.location.hostname.includes('github.io'))
+  ? NGROK_LIVE_URL
+  : '';
+
+// -------- Fallback Demo Data (For Static Hosting / GitHub Pages) --------
+const FALLBACK_USERS = [
+  { id: 1, name: 'Alice Johnson', email: 'alice@example.com' },
+  { id: 2, name: 'Bob Smith', email: 'bob@example.com' },
+  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com' },
+  { id: 4, name: 'Diana Prince', email: 'diana@example.com' }
+];
+
+let FALLBACK_AUCTIONS = [
+  {
+    id: 1,
+    title: 'Vintage Rolex Submariner',
+    description: 'Authentic 1980s Oyster Perpetual Submariner watch with sapphire crystal.',
+    imageUrl: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&auto=format&fit=crop',
+    startingPrice: 1200.00,
+    currentHighestBid: 1350.00,
+    highestBidderName: 'Bob Smith',
+    totalBids: 2,
+    endTime: Math.floor(Date.now() / 1000) + 7200,
+    isActive: true
+  },
+  {
+    id: 2,
+    title: 'MacBook Pro M3 Max (64GB RAM)',
+    description: 'Apple M3 Max chip with 16-core CPU, 64GB Unified Memory, 2TB SSD.',
+    imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop',
+    startingPrice: 1800.00,
+    currentHighestBid: 1950.00,
+    highestBidderName: 'Alice Johnson',
+    totalBids: 3,
+    endTime: Math.floor(Date.now() / 1000) + 5400,
+    isActive: true
+  },
+  {
+    id: 3,
+    title: 'Sony Alpha A7 IV Full-Frame Camera',
+    description: '33MP Full-Frame Exmor R CMOS Sensor, 4K 60p video with 28-70mm lens.',
+    imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&auto=format&fit=crop',
+    startingPrice: 950.00,
+    currentHighestBid: 1050.00,
+    highestBidderName: 'Charlie Brown',
+    totalBids: 1,
+    endTime: Math.floor(Date.now() / 1000) + 3600,
+    isActive: true
+  },
+  {
+    id: 4,
+    title: 'Original Oil Painting - Mountain Lake',
+    description: 'Fine art oil painting on linen canvas (30x40 inches), signed.',
+    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&auto=format&fit=crop',
+    startingPrice: 350.00,
+    currentHighestBid: 380.00,
+    highestBidderName: 'Diana Prince',
+    totalBids: 1,
+    endTime: Math.floor(Date.now() / 1000) + 4800,
+    isActive: true
+  }
+];
+
+const FALLBACK_CLOSED = [
+  {
+    id: 101,
+    title: 'Antique Wooden Chess Set',
+    description: 'Hand-carved mahogany chess set from the 1920s.',
+    imageUrl: 'https://images.unsplash.com/photo-1586165368502-1bad9cc4be10?w=400&h=300&fit=crop',
+    startingPrice: 75.00,
+    currentHighestBid: 125.00,
+    settledPrice: 100.00,
+    winnerName: 'Ethan Hunt',
+    totalBids: 2,
+    isActive: false
+  },
+  {
+    id: 102,
+    title: 'Signed First-Edition Novel',
+    description: 'First-edition hardcover signed by the author.',
+    imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop',
+    startingPrice: 50.00,
+    currentHighestBid: 65.00,
+    settledPrice: 65.00,
+    winnerName: 'Charlie Brown',
+    totalBids: 1,
+    isActive: false
+  }
+];
+
+let localBidHistory = [];
 
 // -------- State --------
 let currentUserId = 1;
@@ -124,19 +217,23 @@ async function api(method, path, body) {
 async function loadUsers() {
   try {
     const data = await api('GET', '/api/users');
-    const users = data.users || [];
-    userSelector.innerHTML = '';
-    users.forEach((u) => {
-      const opt = document.createElement('option');
-      opt.value = u.id;
-      opt.textContent = u.name;
-      if (u.id === currentUserId) opt.selected = true;
-      userSelector.appendChild(opt);
-    });
-    updateAvatar();
+    const users = (data && data.users && data.users.length) ? data.users : FALLBACK_USERS;
+    renderUserOptions(users);
   } catch (e) {
-    console.warn('Could not load users', e);
+    renderUserOptions(FALLBACK_USERS);
   }
+}
+
+function renderUserOptions(users) {
+  userSelector.innerHTML = '';
+  users.forEach((u) => {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = u.name;
+    if (u.id === currentUserId) opt.selected = true;
+    userSelector.appendChild(opt);
+  });
+  updateAvatar();
 }
 
 function updateAvatar() {
@@ -150,7 +247,6 @@ function updateAvatar() {
 userSelector.addEventListener('change', () => {
   currentUserId = parseInt(userSelector.value, 10);
   updateAvatar();
-  // Refresh dashboard if it's the current tab
   if (!sections.dashboard.classList.contains('hidden')) {
     loadDashboard();
   }
@@ -166,9 +262,9 @@ function setBackendStatus(online) {
     if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
     if (text) text.textContent = 'Backend Connected (C++)';
   } else {
-    pill.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200';
-    if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
-    if (text) text.textContent = 'Backend Disconnected';
+    pill.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200';
+    if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+    if (text) text.textContent = 'Interactive Demo Mode';
   }
 }
 
@@ -176,13 +272,19 @@ function setBackendStatus(online) {
 async function loadAuctions() {
   try {
     const data = await api('GET', '/api/auctions');
-    auctions = data.auctions || [];
-    setBackendStatus(true);
-    renderLiveAuctions();
+    if (data && data.auctions) {
+      auctions = data.auctions;
+      setBackendStatus(true);
+    } else {
+      throw new Error('No auctions');
+    }
   } catch (e) {
+    if (auctions.length === 0) {
+      auctions = FALLBACK_AUCTIONS;
+    }
     setBackendStatus(false);
-    console.warn('Could not load auctions', e);
   }
+  renderLiveAuctions();
 }
 
 function renderLiveAuctions() {
@@ -350,13 +452,27 @@ modalSubmit.addEventListener('click', async () => {
       showToast(data.message || 'Bid placed successfully!', 'success');
       closeBidModal();
       await loadAuctions();
+      return;
     } else {
       showToast(data.error || 'Failed to place bid', 'error');
       bidError.textContent = data.error || 'Failed to place bid';
       bidError.classList.remove('hidden');
     }
   } catch (err) {
-    showToast('Network error — please try again', 'error');
+    // Local fallback for offline/GitHub Pages
+    auction.currentHighestBid = amount;
+    auction.highestBidderName = currentUserName;
+    auction.totalBids = (auction.totalBids || 0) + 1;
+    localBidHistory.unshift({
+      auctionId: auction.id,
+      auctionTitle: auction.title,
+      amount: amount,
+      timestamp: Math.floor(Date.now() / 1000),
+      isWinning: true
+    });
+    showToast(`Bid of ${formatCurrency(amount)} placed successfully!`, 'success');
+    closeBidModal();
+    renderLiveAuctions();
   } finally {
     modalSubmit.disabled = false;
     modalSubmit.textContent = 'Submit Bid';
@@ -373,75 +489,82 @@ bidAmountInput.addEventListener('keydown', (e) => {
 
 // -------- Closed Auctions --------
 async function loadClosedAuctions() {
+  let closed = [];
   try {
     const data = await api('GET', '/api/closed');
-    const closed = data.auctions || [];
-
-    if (closed.length === 0) {
-      closedTbody.innerHTML = '';
-      closedEmpty.classList.remove('hidden');
-      return;
-    }
-
-    closedEmpty.classList.add('hidden');
-    closedTbody.innerHTML = closed
-      .map(
-        (a) => `
-      <tr class="hover:bg-slate-50 transition-colors">
-        <td>
-          <div class="flex items-center gap-3">
-            ${
-              a.imageUrl
-                ? `<img src="${escapeHtml(a.imageUrl)}" class="w-10 h-10 rounded-lg object-cover border border-slate-200" onerror="this.style.display='none'" />`
-                : `<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909"/></svg>
-                   </div>`
-            }
-            <div>
-              <p class="font-semibold text-slate-900">${escapeHtml(a.title)}</p>
-              ${a.description ? `<p class="text-xs text-slate-500 line-clamp-1">${escapeHtml(a.description)}</p>` : ''}
-            </div>
-          </div>
-        </td>
-        <td>
-          <span class="font-semibold text-amber-700">${a.winnerName ? escapeHtml(a.winnerName) : '—'}</span>
-        </td>
-        <td class="text-emerald-700 font-bold">${formatCurrency(a.currentHighestBid)}</td>
-        <td class="text-sky-700 font-bold">${a.settledPrice != null ? formatCurrency(a.settledPrice) : '—'}</td>
-        <td><span class="px-2 py-0.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">${a.totalBids}</span></td>
-        <td><span class="status-badge losing">Closed</span></td>
-      </tr>`
-      )
-      .join('');
+    closed = (data && data.auctions && data.auctions.length) ? data.auctions : FALLBACK_CLOSED;
   } catch (e) {
-    console.warn('Could not load closed auctions', e);
+    closed = FALLBACK_CLOSED;
   }
+
+  if (!closed || closed.length === 0) {
+    closedTbody.innerHTML = '';
+    closedEmpty.classList.remove('hidden');
+    return;
+  }
+
+  closedEmpty.classList.add('hidden');
+  closedTbody.innerHTML = closed
+    .map(
+      (a) => `
+    <tr class="hover:bg-slate-50 transition-colors">
+      <td>
+        <div class="flex items-center gap-3">
+          ${
+            a.imageUrl
+              ? `<img src="${escapeHtml(a.imageUrl)}" class="w-10 h-10 rounded-lg object-cover border border-slate-200" onerror="this.style.display='none'" />`
+              : `<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909"/></svg>
+                 </div>`
+          }
+          <div>
+            <p class="font-semibold text-slate-900">${escapeHtml(a.title)}</p>
+            ${a.description ? `<p class="text-xs text-slate-500 line-clamp-1">${escapeHtml(a.description)}</p>` : ''}
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="font-semibold text-amber-700">${a.winnerName ? escapeHtml(a.winnerName) : '—'}</span>
+      </td>
+      <td class="text-emerald-700 font-bold">${formatCurrency(a.currentHighestBid)}</td>
+      <td class="text-sky-700 font-bold">${a.settledPrice != null ? formatCurrency(a.settledPrice) : '—'}</td>
+      <td><span class="px-2 py-0.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">${a.totalBids}</span></td>
+      <td><span class="status-badge losing">Closed</span></td>
+    </tr>`
+    )
+    .join('');
 }
 
 // -------- Dashboard --------
 async function loadDashboard() {
+  let history = [];
   try {
     const data = await api('GET', `/api/users/${currentUserId}`);
-    const history = data.bidHistory || [];
+    history = data.bidHistory || [];
+  } catch (e) {
+    history = localBidHistory;
+  }
+  if (!history.length && localBidHistory.length) {
+    history = localBidHistory;
+  }
 
-    $('#stat-total-bids').textContent = data.totalBids || history.length;
+  $('#stat-total-bids').textContent = history.length;
+  const winning = history.filter((b) => b.isWinning).length;
+  const losing = history.length - winning;
+  $('#stat-winning').textContent = winning;
+  $('#stat-losing').textContent = losing;
 
-    const winning = history.filter((b) => b.isWinning).length;
-    const losing = history.length - winning;
-    $('#stat-winning').textContent = winning;
-    $('#stat-losing').textContent = losing;
+  if (history.length === 0) {
+    bidHistoryList.innerHTML = '';
+    dashboardEmpty.classList.remove('hidden');
+    return;
+  }
 
-    if (history.length === 0) {
-      bidHistoryList.innerHTML = '';
-      dashboardEmpty.classList.remove('hidden');
-      return;
-    }
-
-    dashboardEmpty.classList.add('hidden');
-
-    bidHistoryList.innerHTML = history
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .map(
+  dashboardEmpty.classList.add('hidden');
+  bidHistoryList.innerHTML = history
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .map(
         (bid) => `
       <div class="bid-history-row">
         <div class="flex-1">

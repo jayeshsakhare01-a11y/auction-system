@@ -2,6 +2,9 @@
 
 A high-performance real-time Vickrey second-price auction system built in modern C++ with an in-memory Binary Search Tree (BST) architecture, self-contained Winsock HTTP server, and a clean web frontend.
 
+🌐 **Live Demo (GitHub Pages):** [https://jayeshsakhare01-a11y.github.io/auction-system/](https://jayeshsakhare01-a11y.github.io/auction-system/)  
+⚡ **Live Tunnel (Ngrok Backend):** [https://democracy-unluckily-affront.ngrok-free.dev](https://democracy-unluckily-affront.ngrok-free.dev)
+
 ---
 
 ## 🚀 Key Features
@@ -61,3 +64,4 @@ g++ -std=c++14 -O2 -I backend/include -o bidmatrix.exe backend/src/main.cpp -lws
 ```
 
 Access the UI at: **http://localhost:8080**
+
